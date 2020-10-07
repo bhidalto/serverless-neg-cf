@@ -2,7 +2,7 @@
 
 Repository containing a first approach on the usage of [Serverless NEGs](https://cloud.google.com/load-balancing/docs/negs/serverless-neg-concepts) in conjunction with Cloud Functions.
 
-This combination will allow us to make our functions globally available, serving content from the region closer to the user and all of them behind the same endpoint that the Load Balancer will be providing.
+This combination will allow us to make our functions run below the Load Balancer which will be providing an IP/custom domain to call our functions and also leverage the workload by distributing it in the functions attached to the NEG.
 
 
 ## 1. Activate Cloud Functions API
@@ -47,13 +47,13 @@ storage.googleapis.com            Cloud Storage API
 ```
 ## 3. Deploying to Cloud Functions
 
-### 3.1 Europe-west1 region Function
+### 3.1 Europe-west1 region Function1
 
 Let's create a folder to host our first function:
 
 ```
-mkdir function-eu-region
-cd function-eu-region
+mkdir function-eu-region-1
+cd function-eu-region-1
 ```
 
 Now based on the samples provided in the public [documentation](https://cloud.google.com/functions/docs/first-python#creating_a_function), let's create a sample helloworld function. Create a `main.py` file and add the following:
@@ -79,7 +79,7 @@ def hello_http(request):
     elif request_args and 'name' in request_args:
         name = request_args['name']
     else:
-        name = 'World'
+        name = 'World from Function 1'
     return 'Hello {}!'.format(escape(name))
 ```
 We will also need a `requirements.txt` file that will specify our needed dependencies:
@@ -105,20 +105,24 @@ After our deployment is successful, we will be able to see a link like this one:
 So we can simply click on it to see a Hello World! message in our web browser or we can issue a curl command to quickly test it as well:
 `curl  https://europe-west1-[PROJECT_ID].cloudfunctions.net/[FUNCTION_NAME]`
 
-### 3.2 US-central1 region Function
+### 3.2 Europe-west1 region Function2
 
 Now let's move to deploy our second function, located in a different region which we will be able to use under our Load Balancer. To deploy, we're going to repeat the steps above but we'll be hosting the code in a separate folder, for the sake of clarity.
 
 Let's create a different folder first:
 ```
-mkdir function-us-region
-cd function-us-region
+mkdir function-eu-region-2
+cd function-eu-region-2
 ```
-And in here create a `main.py` file and a `requirements.txt` file as we did in the previous step. After that we deploy with the following command:
+And in here create a `main.py` file and a `requirements.txt` file as we did in the previous step with a minor modification to our `main.py` file:
+Replace the name to greet the user from Function 2 instead of Function 1 this time:
+`name = 'World from Function 2'`
+
+After that we deploy with the following command:
 
 ```
 gcloud functions deploy [FUNCTION_NAME] \
---region us-central1 \
+--region europe-west1 \
 --runtime python38 \
 --trigger-http \
 --allow-unauthenticated \
