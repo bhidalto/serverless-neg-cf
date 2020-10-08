@@ -18,5 +18,5 @@ def hello_http(request):
     elif request_args and 'name' in request_args:
         name = request_args['name']
     else:
-        name = 'World from Function 2'
+        name = 'World from Europe'
     return 'Hello {}!'.format(escape(name))
